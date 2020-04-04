@@ -120,7 +120,7 @@ class GiturlEventListener(sublime_plugin.EventListener):
         with open(menu_file, 'w') as f:
             contextmenu = [
                 {
-                    'caption': 'Browse commit url...',
+                    'caption': 'Open Commit Url...',
                     'command': 'giturl_browse',
                     'id': '~giturl_1',
                     'args': {
@@ -129,7 +129,7 @@ class GiturlEventListener(sublime_plugin.EventListener):
                     },
                 },
                 {
-                    'caption': 'Browse branch url...',
+                    'caption': 'Open Branch Url...',
                     'command': 'giturl_browse',
                     'id': '~giturl_2',
                     'args': {
@@ -141,7 +141,7 @@ class GiturlEventListener(sublime_plugin.EventListener):
 
             if repo_data['current_branch'] != repo_data['default_branch']:
                 contextmenu.append({
-                    'caption': 'Browse default branch url...',
+                    'caption': 'Open Default Branch Url...',
                     'command': 'giturl_browse',
                     'id': '~giturl_3',
                     'args': {
