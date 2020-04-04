@@ -113,6 +113,14 @@ class GiturlEventListener(sublime_plugin.EventListener):
                 'repo': parts.group(3),
             }
 
+        parts = re.match('^[^@]+@([^/]+):([^/]+)/(.+).git$', remote_origin)
+        if parts:
+            return {
+                'domain': parts.group(1),
+                'user': parts.group(2),
+                'repo': parts.group(3),
+            }
+
     def create_context_menu(self, repo_data):
         plugin_path = os.path.dirname(__file__)
         menu_file = os.path.join(plugin_path, 'Context.sublime-menu')
