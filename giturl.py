@@ -7,10 +7,19 @@ import webbrowser
 
 giturl_domains = {
     'github.com': {
-        'url': 'https://{domain}/{user}/{repo}/blob/{revision}/{path}#L{line}'
+        'url': 'https://{domain}/{user}/{repo}/blob/{revision}/{path}',
+        'line': '#L{line}',
+        'line_range': '#L{line}-L{line_end}'
     },
     'bitbucket.org': {
-        'url': 'https://{domain}/{user}/{repo}/src/{revision}/{path}#lines-{line}',
+        'url': 'https://{domain}/{user}/{repo}/src/{revision}/{path}',
+        'line': '#lines-{line}',
+        'line_range': '#lines-{line}:{line_end}'
+    },
+    'gitlab.com': {
+        'url': 'https://{domain}/{user}/{repo}/blob/{revision}/{path}',
+        'line': '#L{line}',
+        'line_range': '#L{line}-{line_end}'
     },
 }
 
@@ -151,12 +160,24 @@ class GiturlBrowseCommand(sublime_plugin.TextCommand):
         repo_data = kwargs['repo_data']
 
         repo_data['revision'] = repo_data[url_type]
-        repo_data['line'] = self.view.rowcol(self.view.sel()[0].begin())[0] + 1
 
         if repo_data['domain'] in giturl_domains:
-            browse_url = giturl_domains[repo_data['domain']]['url']
+            domain_key = repo_data['domain']
         else:
-            browse_url = giturl_domains['github.com']['url']
+            domain_key = 'github.com'
+
+        browse_url = giturl_domains[domain_key]['url']
+
+        repo_data['line'] = self.view.rowcol(self.view.sel()[0].begin())[0] + 1
+        line_end = self.view.rowcol(self.view.sel()[0].end())[0] + 1
+        if line_end > repo_data['line'] and self.view.rowcol(self.view.sel()[0].end())[1] == 0:
+            line_end -= 1
+
+        if line_end == repo_data['line']:
+            browse_url += giturl_domains[domain_key]['line']
+        else:
+            browse_url += giturl_domains[domain_key]['line_range']
+            repo_data['line_end'] = line_end
 
         for key in repo_data:
             browse_url = browse_url.replace('{' + str(key) + '}', str(repo_data[key]))
