@@ -38,6 +38,11 @@ def remove_context_menu_file():
 
 class GiturlEventListener(sublime_plugin.EventListener):
     def on_activated_async(self, view):
+        settings = sublime.load_settings("GitUrl.sublime-settings")
+        user_domains = settings.get("domains", {})
+        for domain in user_domains:
+            giturl_domains[domain] = user_domains[domain]
+
         remove_context_menu_file()
 
         if not view.file_name():

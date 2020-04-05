@@ -1,0 +1,30 @@
+// Default values for GitUrl.sublime-settings
+{
+    // Self-hosted git services configuration
+    //
+    // Supported keys for domains array entry:
+    //     "url": Default branch url pattern (required)
+    //     "url_commit": Commit url pattern
+    //     "url_branch": Branch url pattern
+    //     "line": Fragment for marking specific line in url
+    //     "line_range": Fragment for marking line range in url
+    //
+    // Supported keys for url pattern:
+    //     {domain}, {user}, {repo}, {path}, {revision}, {line}, {line_end}
+    //
+    // Example configurations:
+    //     "example-simple.com": {
+    //         "url": "https://{domain}/{user}/{repo}/blob/{revision}/{path}",
+    //         "line": "#L{line}",
+    //     },
+    //     "example-complete.net": {
+    //         "url": "http://{domain}/projects/{user}/repos/{repo}/browse/{path}",
+    //         "url_commit": "http://{domain}/projects/{user}/repos/{repo}/browse/{path}?at={revision}",
+    //         "url_branch": "http://{domain}/projects/{user}/repos/{repo}/browse/{path}?at=refs/heads/{revision}",
+    //         "line": "#{line}",
+    //         "line_range": "#{line}-{line_end}",
+    //     },
+    //
+    "domains": {
+    }
+}

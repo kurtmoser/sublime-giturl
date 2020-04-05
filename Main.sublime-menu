@@ -1,0 +1,32 @@
+[
+    {
+        "caption": "Preferences",
+        "mnemonic": "n",
+        "id": "preferences",
+        "children":
+        [
+            {
+                "caption": "Package Settings",
+                "mnemonic": "P",
+                "id": "package-settings",
+                "children":
+                [
+                    {
+                        "caption": "GitUrl",
+                        "children":
+                        [
+                            {
+                                "caption": "Settings",
+                                "command": "edit_settings",
+                                "args": {
+                                    "base_file": "${packages}/GitUrl/GitUrl.sublime-settings",
+                                    "default": "// GitUrl Settings\n{\n\t\"domains\": {\n\t\t$0\n\t}\n}\n"
+                                }
+                            },
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
