@@ -181,18 +181,25 @@ class GiturlEventListener(sublime_plugin.EventListener):
             json.dump(contextmenu, f)
 
 class GiturlBrowseCommand(sublime_plugin.TextCommand):
-    def run(self, edit, **kwargs):
-        global giturl_domains
-
-        url_type = kwargs['url_type']
-        repo_data = kwargs['repo_data']
-
+    def run(self, edit, url_type='current_commit', repo_data=[]):
+        line_start, line_end = self.get_selected_lines()
         repo_data['revision'] = repo_data[url_type]
+        repo_data['line'] = line_start
+        repo_data['line_end'] = line_end
 
         if repo_data['domain'] in giturl_domains:
             domain_key = repo_data['domain']
         else:
             domain_key = 'github.com'
+
+        browse_url = self.get_browse_url(url_type, domain_key, line_start, line_end)
+        for key in repo_data:
+            browse_url = browse_url.replace('{' + str(key) + '}', str(repo_data[key]))
+
+        webbrowser.open_new_tab(browse_url)
+
+    def get_browse_url(self, url_type, domain_key, line_start, line_end):
+        global giturl_domains
 
         if url_type == 'current_commit' and 'url_commit' in giturl_domains[domain_key]:
             browse_url = giturl_domains[domain_key]['url_commit']
@@ -201,18 +208,19 @@ class GiturlBrowseCommand(sublime_plugin.TextCommand):
         else:
             browse_url = giturl_domains[domain_key]['url']
 
-        repo_data['line'] = self.view.rowcol(self.view.sel()[0].begin())[0] + 1
-        line_end = self.view.rowcol(self.view.sel()[0].end())[0] + 1
-        if line_end > repo_data['line'] and self.view.rowcol(self.view.sel()[0].end())[1] == 0:
-            line_end -= 1
-
-        if line_end != repo_data['line'] and 'line_range' in giturl_domains[domain_key]:
+        if line_end != line_start and 'line_range' in giturl_domains[domain_key]:
             browse_url += giturl_domains[domain_key]['line_range']
-            repo_data['line_end'] = line_end
         elif 'line' in giturl_domains[domain_key]:
             browse_url += giturl_domains[domain_key]['line']
 
-        for key in repo_data:
-            browse_url = browse_url.replace('{' + str(key) + '}', str(repo_data[key]))
+        return browse_url
 
-        webbrowser.open_new_tab(browse_url)
+    def get_selected_lines(self):
+        line_start = self.view.rowcol(self.view.sel()[0].begin())[0] + 1
+        line_end = self.view.rowcol(self.view.sel()[0].end())[0] + 1
+        col_end = self.view.rowcol(self.view.sel()[0].end())[1]
+
+        if line_end > line_start and col_end == 0:
+            line_end -= 1
+
+        return (line_start, line_end)
