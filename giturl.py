@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import sublime
 import sublime_plugin
 import subprocess
 import webbrowser
@@ -136,27 +137,41 @@ class GiturlEventListener(sublime_plugin.EventListener):
                         'repo_data': repo_data,
                     },
                 },
-                {
-                    'caption': 'Open Branch Url...',
-                    'command': 'giturl_browse',
-                    'id': '~giturl_2',
-                    'args': {
-                        'url_type': 'current_branch',
-                        'repo_data': repo_data,
-                    },
-                },
             ]
 
             if repo_data['current_branch'] != repo_data['default_branch']:
-                contextmenu.append({
-                    'caption': 'Open Default Branch Url...',
-                    'command': 'giturl_browse',
-                    'id': '~giturl_3',
-                    'args': {
-                        'url_type': 'default_branch',
-                        'repo_data': repo_data,
+                contextmenu.extend([
+                    {
+                        'caption': 'Open Branch Url...',
+                        'command': 'giturl_browse',
+                        'id': '~giturl_2',
+                        'args': {
+                            'url_type': 'current_branch',
+                            'repo_data': repo_data,
+                        },
                     },
-                })
+                    {
+                        'caption': 'Open Default Branch Url...',
+                        'command': 'giturl_browse',
+                        'id': '~giturl_3',
+                        'args': {
+                            'url_type': 'default_branch',
+                            'repo_data': repo_data,
+                        },
+                    },
+                ])
+            else:
+                contextmenu.extend([
+                    {
+                        'caption': 'Open Branch Url...',
+                        'command': 'giturl_browse',
+                        'id': '~giturl_2',
+                        'args': {
+                            'url_type': 'default_branch',
+                            'repo_data': repo_data,
+                        },
+                    }
+                ])
 
             json.dump(contextmenu, f)
 
@@ -174,7 +189,12 @@ class GiturlBrowseCommand(sublime_plugin.TextCommand):
         else:
             domain_key = 'github.com'
 
-        browse_url = giturl_domains[domain_key]['url']
+        if url_type == 'current_commit' and 'url_commit' in giturl_domains[domain_key]:
+            browse_url = giturl_domains[domain_key]['url_commit']
+        elif url_type == 'current_branch' and 'url_branch' in giturl_domains[domain_key]:
+            browse_url = giturl_domains[domain_key]['url_branch']
+        else:
+            browse_url = giturl_domains[domain_key]['url']
 
         repo_data['line'] = self.view.rowcol(self.view.sel()[0].begin())[0] + 1
         line_end = self.view.rowcol(self.view.sel()[0].end())[0] + 1
