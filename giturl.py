@@ -201,11 +201,11 @@ class GiturlBrowseCommand(sublime_plugin.TextCommand):
         if line_end > repo_data['line'] and self.view.rowcol(self.view.sel()[0].end())[1] == 0:
             line_end -= 1
 
-        if line_end == repo_data['line']:
-            browse_url += giturl_domains[domain_key]['line']
-        else:
+        if line_end != repo_data['line'] and 'line_range' in giturl_domains[domain_key]:
             browse_url += giturl_domains[domain_key]['line_range']
             repo_data['line_end'] = line_end
+        elif 'line' in giturl_domains[domain_key]:
+            browse_url += giturl_domains[domain_key]['line']
 
         for key in repo_data:
             browse_url = browse_url.replace('{' + str(key) + '}', str(repo_data[key]))
