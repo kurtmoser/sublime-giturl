@@ -105,19 +105,19 @@ class GiturlEventListener(sublime_plugin.EventListener):
         return proc_return.decode().strip()
 
     def parse_remote_origin(self, remote_origin):
-        parts = re.match('^[^:]+://([^/]+)/([^/]+)/(.+).git$', remote_origin)
+        parts = re.match('^[^:]+://([^/]+)/.*?([^/]+)/([^/]+).git$', remote_origin)
         if parts:
             return {
                 'domain': parts.group(1),
-                'user': parts.group(2),
+                'user': parts.group(2).lstrip('~'),
                 'repo': parts.group(3),
             }
 
-        parts = re.match('^[^@]+@([^/]+):([^/]+)/(.+).git$', remote_origin)
+        parts = re.match('^[^@]+@([^:]+):.*?([^/]+)/([^/]+).git$', remote_origin)
         if parts:
             return {
                 'domain': parts.group(1),
-                'user': parts.group(2),
+                'user': parts.group(2).lstrip('~'),
                 'repo': parts.group(3),
             }
 
