@@ -12,17 +12,17 @@ Clone or install repo into new subdirectory in Sublime Packages directory (Prefe
 
 Linux
 ```
-git clone https://github.com/kurtmoser/sublime-giturl.git ~/.config/sublime-text-3/Packages/giturl
+git clone https://github.com/kurtmoser/sublime-giturl.git ~/.config/sublime-text-3/Packages/GitUrl
 ```
 
 Mac
 ```
-git clone https://github.com/kurtmoser/sublime-giturl.git ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/giturl
+git clone https://github.com/kurtmoser/sublime-giturl.git ~/Library/Application\ Support/Sublime\ Text\ 3/Packages/GitUrl
 ```
 
 Windows
 ```
-git clone https://github.com/kurtmoser/sublime-giturl.git 'C:\Users\<username>\AppData\Roaming\Sublime Text 3\Packages\giturl'
+git clone https://github.com/kurtmoser/sublime-giturl.git "C:\Users\<username>\AppData\Roaming\Sublime Text 3\Packages\GitUrl"
 ```
 
 ## Configuration
