@@ -40,6 +40,8 @@ def plugin_unloaded():
     remove_context_menu_file()
 
 def remove_context_menu_file():
+    """Remove Sublime context menu items"""
+
     plugin_path = os.path.dirname(__file__)
     menu_file = os.path.join(plugin_path, 'Context.sublime-menu')
 
@@ -94,11 +96,15 @@ class GiturlEventListener(sublime_plugin.EventListener):
         self.create_context_menu()
 
     def get_local_repodir(self, dirname):
+        """Get git repo local root directory"""
+
         cmd = 'git rev-parse --show-toplevel'
         local_repodir = self.get_exec_response(cmd, dirname)
         return local_repodir
 
     def get_remote_origin(self, dirname):
+        """Get git repo remote origin"""
+
         cmd = 'git config --list'
         return_lines = self.get_exec_response(cmd, dirname).split('\n')
         for line in return_lines:
@@ -107,26 +113,36 @@ class GiturlEventListener(sublime_plugin.EventListener):
                 return remote_origin
 
     def get_default_branch_name(self, dirname):
+        """Get git repo default branch name"""
+
         cmd = 'git symbolic-ref refs/remotes/origin/HEAD | sed \'s@^refs/remotes/origin/@@\''
         default_branch = self.get_exec_response(cmd, dirname)
         return default_branch
 
     def get_current_branch_name(self, dirname):
+        """Get git repo current branch name"""
+
         cmd = 'git rev-parse --abbrev-ref HEAD'
         current_branch = self.get_exec_response(cmd, dirname)
         return current_branch
 
     def get_current_commit_hash(self, dirname, filename):
+        """Get git repo file latest commit hash"""
+
         cmd = 'git rev-list -1 HEAD ' + filename
         commit_hash = self.get_exec_response(cmd, dirname)
         return commit_hash
 
     def get_exec_response(self, cmd, dirname):
+        """Execute shell command and return response"""
+
         proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, cwd=dirname)
         proc_return = proc.stdout.read()
         return proc_return.decode().strip()
 
     def parse_remote_origin(self, remote_origin):
+        """Split git remote origin string into parts"""
+
         parts = re.match('^[^:]+://([^/]+)/.*?([^/]+)/([^/]+).git$', remote_origin)
         if parts:
             return {
@@ -144,6 +160,8 @@ class GiturlEventListener(sublime_plugin.EventListener):
             }
 
     def create_context_menu(self):
+        """Create Sublime context menu items"""
+
         global repo_data
 
         plugin_path = os.path.dirname(__file__)
@@ -217,6 +235,8 @@ class GiturlOpenDefaultBranchCommand(sublime_plugin.TextCommand):
 
 class UrlGenerator():
     def generate_url(self, view, url_type, repo_data):
+        """Generate git repo browse url"""
+
         self.view = view
         line_start, line_end = self.get_selected_lines()
         repo_data['revision'] = repo_data[url_type]
@@ -235,6 +255,8 @@ class UrlGenerator():
         return url
 
     def get_url_pattern(self, url_type, domain_key, line_start, line_end):
+        """Get git repo url pattern"""
+
         global giturl_domains
 
         if url_type == 'current_commit' and 'url_commit' in giturl_domains[domain_key]:
@@ -252,6 +274,8 @@ class UrlGenerator():
         return browse_url
 
     def get_selected_lines(self):
+        """Get selected/active lines in editor"""
+
         line_start = self.view.rowcol(self.view.sel()[0].begin())[0] + 1
         line_end = self.view.rowcol(self.view.sel()[0].end())[0] + 1
         col_end = self.view.rowcol(self.view.sel()[0].end())[1]
