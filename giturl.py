@@ -52,6 +52,8 @@ class GiturlEventListener(sublime_plugin.EventListener):
     def on_activated_async(self, view):
         global repo_data
 
+        repo_data = {}
+
         settings = sublime.load_settings("GitUrl.sublime-settings")
         user_domains = settings.get("domains", {})
         for domain in user_domains:
@@ -184,6 +186,9 @@ class GiturlOpenCommitCommand(sublime_plugin.TextCommand):
     def run(self, edit, **kwargs):
         global repo_data
 
+        if not len(repo_data):
+            return
+
         url_generator = UrlGenerator()
         url = url_generator.generate_url(self.view, 'current_commit', repo_data)
         webbrowser.open_new_tab(url)
@@ -192,6 +197,9 @@ class GiturlOpenBranchCommand(sublime_plugin.TextCommand):
     def run(self, edit, **kwargs):
         global repo_data
 
+        if not len(repo_data):
+            return
+
         url_generator = UrlGenerator()
         url = url_generator.generate_url(self.view, 'current_branch', repo_data)
         webbrowser.open_new_tab(url)
@@ -199,6 +207,9 @@ class GiturlOpenBranchCommand(sublime_plugin.TextCommand):
 class GiturlOpenDefaultBranchCommand(sublime_plugin.TextCommand):
     def run(self, edit, **kwargs):
         global repo_data
+
+        if not len(repo_data):
+            return
 
         url_generator = UrlGenerator()
         url = url_generator.generate_url(self.view, 'default_branch', repo_data)
