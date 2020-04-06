@@ -249,10 +249,7 @@ class UrlGenerator():
             domain_key = '_bitbucket_selfhosted'
 
         url = self.get_url_pattern(url_type, domain_key, line_start, line_end)
-        for key in repo_data:
-            url = url.replace('{' + str(key) + '}', str(repo_data[key]))
-
-        return url
+        return self.fill_url_pattern(url, repo_data)
 
     def get_url_pattern(self, url_type, domain_key, line_start, line_end):
         """Get git repo url pattern"""
@@ -272,6 +269,13 @@ class UrlGenerator():
             browse_url += giturl_domains[domain_key]['line']
 
         return browse_url
+
+    def fill_url_pattern(self, url, repo_data):
+        """Fill git repo url pattern with repo data"""
+
+        for key in repo_data:
+            url = url.replace('{' + str(key) + '}', str(repo_data[key]))
+        return url
 
     def get_selected_lines(self):
         """Get selected/active lines in editor"""
