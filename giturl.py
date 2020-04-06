@@ -10,17 +10,24 @@ giturl_domains = {
     'github.com': {
         'url': 'https://{domain}/{user}/{repo}/blob/{revision}/{path}',
         'line': '#L{line}',
-        'line_range': '#L{line}-L{line_end}'
+        'line_range': '#L{line}-L{line_end}',
     },
     'bitbucket.org': {
         'url': 'https://{domain}/{user}/{repo}/src/{revision}/{path}',
         'line': '#lines-{line}',
-        'line_range': '#lines-{line}:{line_end}'
+        'line_range': '#lines-{line}:{line_end}',
     },
     'gitlab.com': {
         'url': 'https://{domain}/{user}/{repo}/blob/{revision}/{path}',
         'line': '#L{line}',
-        'line_range': '#L{line}-{line_end}'
+        'line_range': '#L{line}-{line_end}',
+    },
+    '_bitbucket_selfhosted': {
+        'url': 'https://{domain}/projects/{user}/repos/{repo}/browse/{path}',
+        'url_commit': 'https://{domain}/projects/{user}/repos/{repo}/browse/{path}?at={revision}',
+        'url_branch': 'https://{domain}/projects/{user}/repos/{repo}/browse/{path}?at=refs/heads/{revision}',
+        'line': '#{line}',
+        'line_range': '#{line}-{line_end}',
     },
 }
 
@@ -208,7 +215,7 @@ class UrlGenerator():
         if repo_data['domain'] in giturl_domains:
             domain_key = repo_data['domain']
         else:
-            domain_key = 'github.com'
+            domain_key = '_bitbucket_selfhosted'
 
         url = self.get_url_pattern(url_type, domain_key, line_start, line_end)
         for key in repo_data:
