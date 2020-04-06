@@ -24,6 +24,11 @@ giturl_domains = {
     },
 }
 
+# Store repo data globally so that commands don't need additional data passed
+# to them. This is not the best solution but it simplifies binding keyboard
+# shortcuts to commands.
+repo_data = {}
+
 def plugin_unloaded():
     remove_context_menu_file()
 
@@ -38,6 +43,8 @@ def remove_context_menu_file():
 
 class GiturlEventListener(sublime_plugin.EventListener):
     def on_activated_async(self, view):
+        global repo_data
+
         settings = sublime.load_settings("GitUrl.sublime-settings")
         user_domains = settings.get("domains", {})
         for domain in user_domains:
@@ -75,7 +82,7 @@ class GiturlEventListener(sublime_plugin.EventListener):
             'default_branch': default_branch,
         }
 
-        self.create_context_menu(repo_data)
+        self.create_context_menu()
 
     def get_local_repodir(self, dirname):
         cmd = 'git rev-parse --show-toplevel'
@@ -127,7 +134,9 @@ class GiturlEventListener(sublime_plugin.EventListener):
                 'repo': parts.group(3),
             }
 
-    def create_context_menu(self, repo_data):
+    def create_context_menu(self):
+        global repo_data
+
         plugin_path = os.path.dirname(__file__)
         menu_file = os.path.join(plugin_path, 'Context.sublime-menu')
 
@@ -135,12 +144,8 @@ class GiturlEventListener(sublime_plugin.EventListener):
             contextmenu = [
                 {
                     'caption': 'Open Commit Url...',
-                    'command': 'giturl_browse',
+                    'command': 'giturl_open_commit',
                     'id': '~giturl_1',
-                    'args': {
-                        'url_type': 'current_commit',
-                        'repo_data': repo_data,
-                    },
                 },
             ]
 
@@ -148,40 +153,53 @@ class GiturlEventListener(sublime_plugin.EventListener):
                 contextmenu.extend([
                     {
                         'caption': 'Open Branch Url...',
-                        'command': 'giturl_browse',
+                        'command': 'giturl_open_branch',
                         'id': '~giturl_2',
-                        'args': {
-                            'url_type': 'current_branch',
-                            'repo_data': repo_data,
-                        },
                     },
                     {
                         'caption': 'Open Default Branch Url...',
-                        'command': 'giturl_browse',
+                        'command': 'giturl_open_default_branch',
                         'id': '~giturl_3',
-                        'args': {
-                            'url_type': 'default_branch',
-                            'repo_data': repo_data,
-                        },
                     },
                 ])
             else:
                 contextmenu.extend([
                     {
                         'caption': 'Open Branch Url...',
-                        'command': 'giturl_browse',
+                        'command': 'giturl_open_default_branch',
                         'id': '~giturl_2',
-                        'args': {
-                            'url_type': 'default_branch',
-                            'repo_data': repo_data,
-                        },
                     }
                 ])
 
             json.dump(contextmenu, f)
 
-class GiturlBrowseCommand(sublime_plugin.TextCommand):
-    def run(self, edit, url_type='current_commit', repo_data=[]):
+class GiturlOpenCommitCommand(sublime_plugin.TextCommand):
+    def run(self, edit, **kwargs):
+        global repo_data
+
+        url_generator = UrlGenerator()
+        url = url_generator.generate_url(self.view, 'current_commit', repo_data)
+        webbrowser.open_new_tab(url)
+
+class GiturlOpenBranchCommand(sublime_plugin.TextCommand):
+    def run(self, edit, **kwargs):
+        global repo_data
+
+        url_generator = UrlGenerator()
+        url = url_generator.generate_url(self.view, 'current_branch', repo_data)
+        webbrowser.open_new_tab(url)
+
+class GiturlOpenDefaultBranchCommand(sublime_plugin.TextCommand):
+    def run(self, edit, **kwargs):
+        global repo_data
+
+        url_generator = UrlGenerator()
+        url = url_generator.generate_url(self.view, 'default_branch', repo_data)
+        webbrowser.open_new_tab(url)
+
+class UrlGenerator():
+    def generate_url(self, view, url_type, repo_data):
+        self.view = view
         line_start, line_end = self.get_selected_lines()
         repo_data['revision'] = repo_data[url_type]
         repo_data['line'] = line_start
@@ -192,13 +210,13 @@ class GiturlBrowseCommand(sublime_plugin.TextCommand):
         else:
             domain_key = 'github.com'
 
-        browse_url = self.get_browse_url(url_type, domain_key, line_start, line_end)
+        url = self.get_url_pattern(url_type, domain_key, line_start, line_end)
         for key in repo_data:
-            browse_url = browse_url.replace('{' + str(key) + '}', str(repo_data[key]))
+            url = url.replace('{' + str(key) + '}', str(repo_data[key]))
 
-        webbrowser.open_new_tab(browse_url)
+        return url
 
-    def get_browse_url(self, url_type, domain_key, line_start, line_end):
+    def get_url_pattern(self, url_type, domain_key, line_start, line_end):
         global giturl_domains
 
         if url_type == 'current_commit' and 'url_commit' in giturl_domains[domain_key]:
