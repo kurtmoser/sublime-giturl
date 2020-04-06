@@ -51,7 +51,7 @@ def remove_context_menu_file():
         pass
 
 class GiturlEventListener(sublime_plugin.EventListener):
-    def on_activated_async(self, view):
+    def on_activated(self, view):
         global repo_data
 
         repo_data = {}
