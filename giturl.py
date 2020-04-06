@@ -115,9 +115,9 @@ class GiturlEventListener(sublime_plugin.EventListener):
     def get_default_branch_name(self, dirname):
         """Get git repo default branch name"""
 
-        cmd = 'git symbolic-ref refs/remotes/origin/HEAD | sed \'s@^refs/remotes/origin/@@\''
+        cmd = 'git symbolic-ref refs/remotes/origin/HEAD'
         default_branch = self.get_exec_response(cmd, dirname)
-        return default_branch
+        return re.sub('^refs/remotes/origin/', '', default_branch)
 
     def get_current_branch_name(self, dirname):
         """Get git repo current branch name"""
