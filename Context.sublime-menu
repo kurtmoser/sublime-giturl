@@ -1,0 +1,17 @@
+[
+    {
+        "caption": "Open Commit Url...",
+        "command": "giturl_open_commit",
+        "id": "~giturl_1"
+    },
+    {
+        "caption": "Open Branch Url...",
+        "command": "giturl_open_branch",
+        "id": "~giturl_2"
+    },
+    {
+        "caption": "Open Default Branch Url...",
+        "command": "giturl_open_default_branch",
+        "id": "~giturl_3"
+    }
+]

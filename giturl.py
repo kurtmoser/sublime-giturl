@@ -36,20 +36,6 @@ giturl_domains = {
 # shortcuts to commands.
 repo_data = {}
 
-def plugin_unloaded():
-    remove_context_menu_file()
-
-def remove_context_menu_file():
-    """Remove Sublime context menu items"""
-
-    plugin_path = os.path.dirname(__file__)
-    menu_file = os.path.join(plugin_path, 'Context.sublime-menu')
-
-    try:
-        os.remove(menu_file)
-    except FileNotFoundError:
-        pass
-
 class GiturlEventListener(sublime_plugin.EventListener):
     def on_activated(self, view):
         global repo_data
@@ -60,8 +46,6 @@ class GiturlEventListener(sublime_plugin.EventListener):
         user_domains = settings.get("domains", {})
         for domain in user_domains:
             giturl_domains[domain] = user_domains[domain]
-
-        remove_context_menu_file()
 
         if not view.file_name():
             return
@@ -92,8 +76,6 @@ class GiturlEventListener(sublime_plugin.EventListener):
             'current_branch': current_branch,
             'default_branch': default_branch,
         }
-
-        self.create_context_menu()
 
     def get_local_repodir(self, dirname):
         """Get git repo local root directory"""
@@ -159,47 +141,6 @@ class GiturlEventListener(sublime_plugin.EventListener):
                 'repo': parts.group(3),
             }
 
-    def create_context_menu(self):
-        """Create Sublime context menu items"""
-
-        global repo_data
-
-        plugin_path = os.path.dirname(__file__)
-        menu_file = os.path.join(plugin_path, 'Context.sublime-menu')
-
-        with open(menu_file, 'w') as f:
-            contextmenu = [
-                {
-                    'caption': 'Open Commit Url...',
-                    'command': 'giturl_open_commit',
-                    'id': '~giturl_1',
-                },
-            ]
-
-            if repo_data['current_branch'] != repo_data['default_branch']:
-                contextmenu.extend([
-                    {
-                        'caption': 'Open Branch Url...',
-                        'command': 'giturl_open_branch',
-                        'id': '~giturl_2',
-                    },
-                    {
-                        'caption': 'Open Default Branch Url...',
-                        'command': 'giturl_open_default_branch',
-                        'id': '~giturl_3',
-                    },
-                ])
-            else:
-                contextmenu.extend([
-                    {
-                        'caption': 'Open Branch Url...',
-                        'command': 'giturl_open_default_branch',
-                        'id': '~giturl_2',
-                    }
-                ])
-
-            json.dump(contextmenu, f)
-
 class GiturlOpenCommitCommand(sublime_plugin.TextCommand):
     def run(self, edit, **kwargs):
         global repo_data
@@ -211,6 +152,10 @@ class GiturlOpenCommitCommand(sublime_plugin.TextCommand):
         url = url_generator.generate_url(self.view, 'current_commit', repo_data)
         webbrowser.open_new_tab(url)
 
+    def is_visible(self):
+        global repo_data
+        return 'current_commit' in repo_data
+
 class GiturlOpenBranchCommand(sublime_plugin.TextCommand):
     def run(self, edit, **kwargs):
         global repo_data
@@ -219,8 +164,15 @@ class GiturlOpenBranchCommand(sublime_plugin.TextCommand):
             return
 
         url_generator = UrlGenerator()
-        url = url_generator.generate_url(self.view, 'current_branch', repo_data)
+        url_type = 'current_branch'
+        if repo_data['current_branch'] == repo_data['default_branch']:
+            url_type = 'default_branch'
+        url = url_generator.generate_url(self.view, url_type, repo_data)
         webbrowser.open_new_tab(url)
+
+    def is_visible(self):
+        global repo_data
+        return 'current_commit' in repo_data
 
 class GiturlOpenDefaultBranchCommand(sublime_plugin.TextCommand):
     def run(self, edit, **kwargs):
@@ -232,6 +184,10 @@ class GiturlOpenDefaultBranchCommand(sublime_plugin.TextCommand):
         url_generator = UrlGenerator()
         url = url_generator.generate_url(self.view, 'default_branch', repo_data)
         webbrowser.open_new_tab(url)
+
+    def is_visible(self):
+        global repo_data
+        return 'current_commit' in repo_data and repo_data['current_branch'] != repo_data['default_branch']
 
 class UrlGenerator():
     def generate_url(self, view, url_type, repo_data):
